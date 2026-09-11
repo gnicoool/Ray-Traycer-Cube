@@ -4,6 +4,7 @@ mod framebuffer;
 mod light;
 mod ray_intersect;
 mod sphere;
+mod cube;
 
 use minifb::{Key, Window, WindowOptions};
 use nalgebra_glm::{dot, normalize, Vec3};
@@ -16,6 +17,7 @@ use crate::framebuffer::Framebuffer;
 use crate::light::Light;
 use crate::ray_intersect::{Intersect, Material, RayIntersect};
 use crate::sphere::Sphere;
+use crate::cube::Cube;
 
 const WIDTH: usize = 800;
 const HEIGHT: usize = 600;
@@ -113,21 +115,17 @@ fn main() {
     let jade = Material::new(Color::new(60, 130, 100), 30.0, [0.8, 0.25]);
 
     let objects: Vec<Box<dyn RayIntersect>> = vec![
-        Box::new(Sphere {
+        Box::new(Cube {
             center: Vec3::new(0.0, 0.0, 0.0),
-            radius: 1.0,
-            material: ivory,
+            size: 1.0,
+            material: jade,
         }),
         Box::new(Sphere {
             center: Vec3::new(1.8, -0.3, -0.8),
             radius: 0.5,
             material: rubber,
         }),
-        Box::new(Sphere {
-            center: Vec3::new(-1.4, 0.9, 1.0),
-            radius: 0.5,
-            material: cobalt,
-        }),
+
     ];
 
     let light = Light::new(Vec3::new(-6.0, 6.0, 8.0), Color::new(255, 255, 255), 1.5);
