@@ -112,20 +112,15 @@ fn main() {
     let ivory = Material::new(Color::new(100, 100, 80), 50.0, [0.6, 0.3]);
     let rubber = Material::new(Color::new(80, 0, 0), 10.0, [0.9, 0.1]);
     let cobalt = Material::new(Color::new(40, 80, 140), 80.0, [0.7, 0.4]);
-    let jade = Material::new(Color::new(60, 130, 100), 30.0, [0.8, 0.25]);
+    let oro = Material::new(Color::new(247, 232, 105), 30.0, [0.5, 0.5]);
 
     let objects: Vec<Box<dyn RayIntersect>> = vec![
         Box::new(Cube {
             center: Vec3::new(0.0, 0.0, 0.0),
             size: 1.0,
-            material: jade,
-        }),
-        Box::new(Sphere {
-            center: Vec3::new(1.8, -0.3, -0.8),
-            radius: 0.5,
-            material: rubber,
-        }),
-
+            material: oro
+        ,
+        })
     ];
 
     let light = Light::new(Vec3::new(-6.0, 6.0, 8.0), Color::new(255, 255, 255), 1.5);
