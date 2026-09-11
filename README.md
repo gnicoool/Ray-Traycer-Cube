@@ -5,4 +5,4 @@ Proyecto en Rust que implementa figuras como esferas y cubos con distintos mater
 **Jackelyn Giron**
 
 ## Video ejecucion de programa
-![Ejecucion](Cubo-luz-difusa.gif)
+![Ejecucion](Luz-difusa.gif)
