@@ -5,10 +5,12 @@ mod light;
 mod ray_intersect;
 mod sphere;
 mod cube;
+mod texture;
 
 use minifb::{Key, Window, WindowOptions};
 use nalgebra_glm::{dot, normalize, Vec3};
 use std::f32::consts::PI;
+use std::rc::Rc;
 use std::time::Duration;
 
 use crate::camera::Camera;
@@ -18,6 +20,7 @@ use crate::light::Light;
 use crate::ray_intersect::{Intersect, Material, RayIntersect};
 use crate::sphere::Sphere;
 use crate::cube::Cube;
+use crate::texture::Texture;
 
 const WIDTH: usize = 800;
 const HEIGHT: usize = 600;
@@ -36,8 +39,8 @@ pub fn shade(intersect: &Intersect, ray_origin: &Vec3, light: &Light) -> Color {
     let view_direction = (ray_origin - intersect.point).normalize();
 
     let diffuse_intensity = dot(&intersect.normal, &light_direction).max(0.0);
-    let diffuse = intersect.material.diffuse
-        * (diffuse_intensity * intersect.material.albedo[0] * light.intensity);
+    let diffuse_color = intersect.material.diffuse_at(intersect.u, intersect.v);
+    let diffuse = diffuse_color * (diffuse_intensity * intersect.material.albedo[0] * light.intensity);
 
     let reflect_direction = reflect(&-light_direction, &intersect.normal);
     let specular_intensity = dot(&view_direction, &reflect_direction)
@@ -60,7 +63,11 @@ pub fn cast_ray(
 
     for object in objects {
         if let Some(intersect) = object.ray_intersect(ray_origin, ray_direction) {
-            if closest.is_none_or(|current| intersect.distance < current.distance) {
+            let is_closer = match &closest {
+                Some(current) => intersect.distance < current.distance,
+                None => true,
+            };
+            if is_closer {
                 closest = Some(intersect);
             }
         }
@@ -114,12 +121,14 @@ fn main() {
     let cobalt = Material::new(Color::new(40, 80, 140), 80.0, [0.7, 0.4]);
     let oro = Material::new(Color::new(247, 232, 105), 30.0, [0.5, 0.5]);
 
+    let cube_texture = Rc::new(Texture::from_file("textura.png"));
+    let textured = Material::with_texture(30.0, [0.9, 0.3], cube_texture);
+
     let objects: Vec<Box<dyn RayIntersect>> = vec![
         Box::new(Cube {
             center: Vec3::new(0.0, 0.0, 0.0),
             size: 1.0,
-            material: oro
-        ,
+            material: textured,
         })
     ];
 

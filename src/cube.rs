@@ -15,7 +15,8 @@ impl RayIntersect for Cube {
 
         let mut t_min = f32::NEG_INFINITY;
         let mut t_max = f32::INFINITY;
-        let mut normal = Vec3::new(0.0, 0.0, 0.0);
+        let mut normal_min = Vec3::new(0.0, 0.0, 0.0);
+        let mut normal_max = Vec3::new(0.0, 0.0, 0.0);
 
         for axis in 0..3 {
             let origin = ray_origin[axis];
@@ -42,12 +43,14 @@ impl RayIntersect for Cube {
 
             if t1 > t_min {
                 t_min = t1;
-                normal = Vec3::new(0.0, 0.0, 0.0);
-                normal[axis] = sign;
+                normal_min = Vec3::new(0.0, 0.0, 0.0);
+                normal_min[axis] = sign;
             }
 
             if t2 < t_max {
                 t_max = t2;
+                normal_max = Vec3::new(0.0, 0.0, 0.0);
+                normal_max[axis] = -sign;
             }
 
             if t_min > t_max {
@@ -55,19 +58,38 @@ impl RayIntersect for Cube {
             }
         }
 
-        let t = if t_min > 0.0 { t_min } else { t_max };
+        const ALPHA_THRESHOLD: u8 = 128;
 
-        if t <= 0.0 {
-            return None;
+        for (t, normal) in [(t_min, normal_min), (t_max, normal_max)] {
+            if t <= 0.0 {
+                continue;
+            }
+
+            let point = ray_origin + ray_direction * t;
+
+            let local = point - self.center;
+            let (u, v) = if normal.x.abs() > 0.5 {
+                ((local.z / self.size + 0.5), (local.y / self.size + 0.5))
+            } else if normal.y.abs() > 0.5 {
+                ((local.x / self.size + 0.5), (local.z / self.size + 0.5))
+            } else {
+                ((local.x / self.size + 0.5), (local.y / self.size + 0.5))
+            };
+
+            if self.material.alpha_at(u, v) < ALPHA_THRESHOLD {
+                continue;
+            }
+
+            return Some(Intersect {
+                point,
+                normal,
+                distance: t,
+                u,
+                v,
+                material: self.material.clone(),
+            });
         }
 
-        let point = ray_origin + ray_direction * t;
-
-        Some(Intersect {
-            point,
-            normal,
-            distance: t,
-            material: self.material,
-        })
+        None
     }
 }

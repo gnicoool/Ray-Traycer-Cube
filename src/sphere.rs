@@ -35,7 +35,9 @@ impl RayIntersect for Sphere {
             point,
             normal,
             distance: t,
-            material: self.material,
+            u: 0.0,
+            v: 0.0,
+            material: self.material.clone(),
         })
     }
 }
